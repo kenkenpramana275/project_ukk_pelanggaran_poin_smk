@@ -83,6 +83,10 @@ $role = $_SESSION['role'];
 </div>
 
     <div class="nav-footer">
+        <a href="../users/index.php" class="nav-link">
+            <span class="nav-icon">👤</span>
+            <span class="nav-text">Users</span>
+        </a>
         <a href="../auth/logout.php" class="nav-logout">
             <span class="nav-icon">🚪</span>
             <span class="nav-text">Logout</span>

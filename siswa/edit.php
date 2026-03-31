@@ -32,14 +32,24 @@ header("Location: index.php");
     <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-    <form method="post">
-    <input name="nama" value="<?= $siswa['nama'] ?>" required>
-    <input name="nis" value="<?= $siswa['nis'] ?>" required>
-    <input name="kelas" value="<?= $siswa['kelas'] ?>" required>
-    <input name="alamat" value="<?= $siswa['alamat'] ?>" required>
-    <input name="nama_orang_tua" value="<?= $siswa['nama_orang_tua'] ?>" required>
-    <input name="kontak_orang_tua" value="<?= $siswa['kontak_orang_tua'] ?>" required>
-    <button name="update">Update</button>
+    <div class="container-add">
+        <div class="form-box">
+            <h2>Edit Siswa</h2>
+                <form method="post">
+
+                    <input name="nama" value="<?= $siswa['nama'] ?>" required>
+                    <input name="nis" value="<?= $siswa['nis'] ?>" required>
+                    <input name="kelas" value="<?= $siswa['kelas'] ?>" required>
+                    <input name="alamat" value="<?= $siswa['alamat'] ?>" required>
+                    <input name="nama_orang_tua" value="<?= $siswa['nama_orang_tua'] ?>" required>
+                    <input name="kontak_orang_tua" value="<?= $siswa['kontak_orang_tua'] ?>" required>
+                    <button name="update">Update</button>
+
+                </form>
+        </div>
+    </div>
+
+
 </form>
 </body>
 </html>

@@ -55,28 +55,32 @@ if (isset($_POST['update'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit</title>
     <link rel="stylesheet" href="../assets/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-    <h2>Edit Jenis Pelanggaran</h2>
 
-    <form method="POST">
-        <label>Nama Jenis</label><br>
-        <input type="text" name="nama_jenis"
-               value="<?= htmlspecialchars($data['nama_jenis']) ?>" required>
-        <br><br>
+    <div class="container-add">
+        <div class="form-box">
+            <h2>Edit Jenis Pelanggaran</h2>
 
-        <label>Poin</label><br>
-        <input type="number" name="poin"
-               value="<?= $data['poin'] ?>" required>
-        <br><br>
+            <form method="POST">
+                <label>Nama Jenis</label>
+                <input type="text" name="nama_jenis"
+                    value="<?= htmlspecialchars($data['nama_jenis']) ?>" required>
 
-        <button type="submit" name="update" class="btn btn-edit">
-            Update
-        </button>
+                <label>Poin</label>
+                <input type="number" name="poin"
+                    value="<?= $data['poin'] ?>" required>
 
-        <a href="jenis.php" class="btn">Batal</a>
-    </form>
-</div>
+                <button type="submit" name="update" class="btn btn-edit">
+                    Update
+                </button>        
+                <a href="index.php" class="btn">Batal</a>
+            </form>        
+        </div>
+    </div>
+
 </body>
 </html>
