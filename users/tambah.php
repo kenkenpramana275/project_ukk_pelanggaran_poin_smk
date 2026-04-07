@@ -1,6 +1,10 @@
 <?php
 session_start();
 include '../config/database.php';
+include '../config/auth.php';
+
+checkLogin();
+allowRoles(['admin']);
 
 if (!isset($_SESSION['role'])) {
     header("Location: ../auth/login.php");
@@ -13,11 +17,14 @@ if ($_SESSION['role'] != 'admin') {
 }
 
 if (isset($_POST['simpan'])) {
-    $stmt = $pdo->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
+    $id_siswa = ($_POST['role'] == 'siswa' && !empty($_POST['id_siswa'])) ? $_POST['id_siswa'] : null;
+
+    $stmt = $pdo->prepare("INSERT INTO users (username, password, role, id_siswa) VALUES (?, ?, ?, ?)");
     $stmt->execute([
         $_POST['username'],
-        password_hash($_POST['password'], PASSWORD_DEFAULT),
-        $_POST['role']
+        $_POST['password'],
+        $_POST['role'],
+        $id_siswa
     ]);
 
     header("Location: index.php");
@@ -45,20 +52,56 @@ if (isset($_POST['simpan'])) {
             <label>Password</label>
             <input type="password" name="password" required>
 
-            <label>Role</label>
-            <select name="role" required>
+            <label for="role">Role</label>
+            <select name="role" id="role" required>
                 <option value="">-- Pilih Role --</option>
-                <option value="admin">Admin</option>
-                <option value="guru_bk">Guru BK</option>
-                <option value="guru_mapel">Guru Mapel</option>
-                <option value="siswa">Siswa</option>
+                <option value="admin" <?= (isset($user['role']) && $user['role'] == 'admin') ? 'selected' : '' ?>>Admin</option>
+                <option value="guru_bk" <?= (isset($user['role']) && $user['role'] == 'guru_bk') ? 'selected' : '' ?>>Guru BK</option>
+                <option value="guru_mapel" <?= (isset($user['role']) && $user['role'] == 'guru_mapel') ? 'selected' : '' ?>>Guru Mapel</option>
+                <option value="siswa" <?= (isset($user['role']) && $user['role'] == 'siswa') ? 'selected' : '' ?>>Siswa</option>
             </select>
-
+            
+            <div id="siswaField">
+            <label for="id_siswa">Pilih Siswa</label>
+            <select name="id_siswa" id="id_siswa">
+                <option value="">-- Pilih Data Siswa --</option>
+                <?php
+                $stmtSiswa = $pdo->query("SELECT id_siswa, nama, nis FROM siswa ORDER BY nama");
+                while ($s = $stmtSiswa->fetch(PDO::FETCH_ASSOC)) {
+                    $selected = (isset($user['id_siswa']) && $user['id_siswa'] == $s['id_siswa']) ? 'selected' : '';
+                                echo "<option value='{$s['id_siswa']}' {$selected}>"
+                . htmlspecialchars($s['nama']) . " - " . htmlspecialchars($s['nis']) .
+                "</option>";
+                }
+                ?>
+            </select>
+            </div>
             <button type="submit" name="simpan" class="btn-tambah">Simpan</button>
             <a href="index.php" class="btn">Kembali</a>
         </form>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const roleSelect = document.getElementById('role');
+    const siswaField = document.getElementById('siswaField');
+    const siswaSelect = document.getElementById('id_siswa');
+
+    function toggleSiswaField() {
+        if (roleSelect.value === 'siswa') {
+            siswaField.style.display = 'block';
+            siswaSelect.setAttribute('required', 'required');
+        } else {
+            siswaField.style.display = 'none';
+            siswaSelect.value = '';
+            siswaSelect.removeAttribute('required');
+        }
+    }
+
+    toggleSiswaField();
+    roleSelect.addEventListener('change', toggleSiswaField);
+});
+</script>
 </body>
 </html>

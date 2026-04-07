@@ -6,6 +6,10 @@ if(!isset($_SESSION['login'])) {
 }
 
 include '../config/database.php';
+include '../config/auth.php';
+
+checkLogin();
+allowRoles(['admin', 'guru_bk', 'guru_mapel']);
 
 /* ambil data siswa */
 $stmtSiswa = $pdo->query("SELECT id_siswa, nama FROM siswa ORDER BY nama");

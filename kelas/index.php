@@ -4,33 +4,23 @@ include '../config/database.php';
 include '../config/auth.php';
 
 checkLogin();
-allowRoles(['admin', 'guru_bk']);
+allowRoles(['admin']);
 
-$role = $_SESSION['role'];
+$data = $pdo->query("SELECT * FROM kelas ORDER BY nama_kelas")->fetchAll(PDO::FETCH_ASSOC);
 
 $currentFolder = basename(dirname($_SERVER['PHP_SELF']));
 $currentPage   = basename($_SERVER['PHP_SELF']);
-
-$stmt = $pdo->query("
-    SELECT 
-        pelanggaran.*,
-        siswa.id_siswa, 
-        siswa.nama, 
-        jenis_pelanggaran.nama_jenis, 
-        jenis_pelanggaran.poin
-    FROM pelanggaran
-    JOIN siswa ON pelanggaran.id_siswa = siswa.id_siswa
-    JOIN jenis_pelanggaran ON pelanggaran.id_jenis = jenis_pelanggaran.id_jenis
-    ORDER BY pelanggaran.id_pelanggaran
-");
+$role = $_SESSION['role'];
 ?>
-
 <!DOCTYPE html>
-<link rel="stylesheet" href="../assets/style.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<html>
+<head>
+    <title>Data Kelas</title>
+   <link rel="stylesheet" href="../assets/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
 <body>
 
 <div class="nav">
@@ -41,7 +31,7 @@ $stmt = $pdo->query("
     
 <div class="nav-links">
 
-<div class="nav-section">MAIN MENU</div>
+    <div class="nav-section">MAIN MENU</div>
 
     <!-- Dashboard -->
     <a href="../dashboard.php"
@@ -100,6 +90,7 @@ $stmt = $pdo->query("
         <span class="nav-icon">📄</span>
         <span class="nav-text">Pelanggaran Saya</span>
     </a>
+    </a>
     <?php endif; ?>
 
     <?php if($role == 'admin' || $role == 'guru_bk'): ?>
@@ -152,62 +143,39 @@ $stmt = $pdo->query("
     </div>
 </div>
 
+<div class="container">
+    <h2>Data Kelas</h2>
 
-    <div class="container">
-        <h2>Data Pelanggaran</h2>
+    <a href="tambah.php" class="btn btn-tambah">Tambah Kelas</a>
 
-    <?php if($role == 'admin' || $role == 'guru_bk' || $role == 'guru_mapel'): ?>
-    <a href="tambah.php" class="btn btn-tambah">Tambah</a>
-    <?php endif; ?>
-
-    <table id="usersTable" class="display">
-    <thead>
+    <table>
         <tr>
             <th>No</th>
-            <!-- <th>ID Pelanggaran</th>
-            <th>ID Jenis</th> -->
-            <th>Nama Siswa</th>
-            <th>Tanggal</th>
-            <th>Keterangan</th>
-            <th>Poin</th>
+            <th>Tingkat</th>
+            <th>Jurusan</th>
+            <th>Nama Kelas</th>
             <th>Aksi</th>
         </tr>
-    </thead>
-    <tbody>
-        <?php
-        // Use YOUR PDO connection  
-        $no = 1;    
 
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    echo "<tr>";
-    echo "<td>{$no}</td>";
-    // echo "<td>{$row['id_pelanggaran']}</td>";
-    // echo "<td>{$row['id_jenis']}</td>";
-    echo "<td>{$row['nama']}</td>"; // ← tampilkan nama siswa
-    echo "<td>{$row['tanggal']}</td>";
-    echo "<td>{$row['keterangan']}</td>";
-    echo "<td>{$row['poin']}</td>";
-    // echo "<td>
-    //     <a href='cetak_rekap.php?id_siswa={$row['id_siswa']}' target='_blank' class='btn'>
-    //         Cetak
-    //     </a>
-    // </td>";
-    echo "<td>
-    <a href='edit.php?id={$row['id_pelanggaran']}' class='btn btn-edit'>Edit</a>
-    <a href='hapus.php?id={$row['id_pelanggaran']}' class='btn btn-delete' onclick=\"return confirm('Yakin ingin menghapus data pelanggaran ini?');\">Hapus</a>
-    </td>";
-    echo "</tr>";
-    $no++;
-}
-        ?>
-    </tbody>
-</table></div>
+        <?php $no = 1; ?>
+        <?php foreach($data as $row): ?>
+        <tr>
+            <td><?= $no++; ?></td>
+            <td><?= htmlspecialchars($row['tingkat']); ?></td>
+            <td><?= htmlspecialchars($row['jurusan']); ?></td>
+            <td><?= htmlspecialchars($row['nama_kelas']); ?></td>
+            <td>
+                <a href="edit.php?id=<?= $row['id_kelas']; ?>" class="btn btn-edit">Edit</a>
+                <a href="hapus.php?id=<?= $row['id_kelas']; ?>" 
+                class="btn btn-delete"
+                onclick="return confirm('Yakin hapus kelas?')">
+                Hapus
+                </a>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+</div>
+
 </body>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#usersTable').DataTable();
-    });
-</script>
 </html>

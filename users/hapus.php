@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/database.php';
+include '../config/auth.php';
 
 if (!isset($_SESSION['role'])) {
     header("Location: ../auth/login.php");
@@ -11,6 +12,9 @@ if ($_SESSION['role'] != 'admin') {
     echo "Akses ditolak!";
     exit;
 }
+
+checkLogin();
+allowRoles(['admin']);
 
 $id = $_GET['id'];
 

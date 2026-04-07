@@ -5,13 +5,14 @@ include '../config/database.php';
 /* TAMBAH DATA */
 if (isset($_POST['simpan'])) {
     $stmt = $pdo->prepare(
-        "INSERT INTO jenis_pelanggaran (nama_jenis, poin, deskripsi)
-         VALUES (?, ?, ?)"
+        "INSERT INTO jenis_pelanggaran (nama_jenis, deskripsi, poin, kategori_kode)
+         VALUES (?, ?, ?, ?)"
     );
     $stmt->execute([
         $_POST['nama_jenis'],
+        $_POST['deskripsi'],
         $_POST['poin'],
-        $_POST['deskripsi']
+        $_POST['kategori_kode'],
     ]);
 
     header("Location: index.php");
@@ -37,11 +38,23 @@ if (isset($_POST['simpan'])) {
       <label>Nama Jenis</label>
       <input type="text" name="nama_jenis" required>
 
+      <label>Deskripsi Pelanggaran</label>
+      <input type="text" name="deskripsi" required>
+
       <label>Poin Pelanggaran</label>
       <input type="number" name="poin" required>
 
-      <label>Deskripsi Pelanggaran</label>
-      <input type="text" name="deskripsi" required>
+      <label>Kategori kode</label>
+      <select name="kategori_kode" required>
+          <option value="">-- Pilih Kategori --</option>
+          <option value="SS">SS - Seragam Sekolah</option>
+          <option value="KS">KS - Kehadiran di Sekolah</option>
+          <option value="PBM">PBM - Proses Belajar Mengajar</option>
+          <option value="PNN">PNN - Pelanggaran Norma-Norma</option>
+          <option value="PB">PB - Pelanggaran Berat</option>
+          <option value="KB">KB - Kesopanan Berkendaraan</option>
+          <option value="UB">UB - Upacara Bendera</option>
+      </select>
 
       <button name="simpan">Simpan</button>
     </form>

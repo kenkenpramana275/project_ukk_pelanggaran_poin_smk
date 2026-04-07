@@ -1,14 +1,17 @@
 <?php
 session_start(); if(!isset($_SESSION['login'])) header("Location: ../auth/login.php");
 include '../config/database.php';
+include '../config/auth.php';
 
 $currentFolder = basename(dirname($_SERVER['PHP_SELF']));
 $currentPage   = basename($_SERVER['PHP_SELF']);
 
 $role = $_SESSION['role'];
+
+checkLogin();
+allowRoles(['admin', 'guru_bk']);
+
 ?>
-
-
 
 <!DOCTYPE html>
 <link rel="stylesheet" href="../assets/style.css">
@@ -28,12 +31,22 @@ $role = $_SESSION['role'];
     
 <div class="nav-links">
 
+    <div class="nav-section">MAIN MENU</div>
+
     <!-- Dashboard -->
     <a href="../dashboard.php"
        class="nav-link <?= ($currentPage == 'dashboard.php') ? 'active' : '' ?>">
         <span class="nav-icon">🏠</span>
         <span class="nav-text">Dashboard</span>
     </a>
+
+    <?php if($role == 'admin'): ?>
+    <a href="../kelas/index.php"
+    class="nav-link <?= ($currentFolder == 'kelas') ? 'active' : '' ?>">
+        <span class="nav-icon">🏫</span>
+        <span class="nav-text">Data Kelas</span>
+    </a>
+    <?php endif; ?>
 
     <!-- ADMIN ONLY -->
     <?php if($role == 'admin'): ?>
@@ -73,20 +86,54 @@ $role = $_SESSION['role'];
 
     <!-- SISWA -->
     <?php if($role == 'siswa'): ?>
-    <a href="../pelanggaran/index.php"
-       class="nav-link">
+    <a href="../pelanggaran/saya.php" class="nav-link <?= ($currentPage == 'saya.php') ? 'active' : '' ?>">
         <span class="nav-icon">📄</span>
         <span class="nav-text">Pelanggaran Saya</span>
     </a>
     <?php endif; ?>
 
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../cetak_rekap/index.php"
+    class="nav-link <?= ($currentFolder == 'cetak_rekap') ? 'active' : '' ?>">
+        <span class="nav-icon">🖨️</span>
+        <span class="nav-text">Rekap Pelanggaran</span>
+    </a>
+    <?php endif; ?>
+
+    <div class="nav-section">CETAK SURAT</div>
+
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../surat_orangtua/index.php"
+    class="nav-link <?= ($currentFolder == 'surat_orangtua') ? 'active' : '' ?>">
+        <span class="nav-icon">📨</span>
+        <span class="nav-text">Panggilan Orang Tua</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../surat_perjanjian/index.php"
+    class="nav-link <?= ($currentFolder == 'surat_perjanjian') ? 'active' : '' ?>">
+        <span class="nav-icon">📝</span>
+        <span class="nav-text">Surat Perjanjian</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../surat_pindah/index.php"
+    class="nav-link <?= ($currentFolder == 'surat_pindah') ? 'active' : '' ?>">
+        <span class="nav-icon">📑</span>
+        <span class="nav-text">Surat Pindah</span>
+    </a>
+    <?php endif; ?>
 </div>
 
     <div class="nav-footer">
+        <?php if($role == 'admin'): ?>
         <a href="../users/index.php" class="nav-link">
             <span class="nav-icon">👤</span>
             <span class="nav-text">Users</span>
         </a>
+        <?php endif; ?>
         <a href="../auth/logout.php" class="nav-logout">
             <span class="nav-icon">🚪</span>
             <span class="nav-text">Logout</span>
@@ -104,19 +151,34 @@ $role = $_SESSION['role'];
             <th>Nama Siswa</th>
             <th>NIS</th>
             <th>Kelas</th>
-            <th></th>
+            <th>Jenis Kelamin</th>
+            <th>Aksi</th>
         </tr>
     </thead>
     <tbody>
 <?php
 $no = 1; // numbering mulai dari 1
-$stmt = $pdo->query("SELECT id_siswa, nama, nis, kelas FROM siswa ORDER BY id_siswa");
+$no = 1;
+$stmt = $pdo->query("
+    SELECT 
+        siswa.*, 
+        kelas.tingkat, 
+        kelas.jurusan, 
+        kelas.nama_kelas
+    FROM siswa
+    JOIN kelas ON siswa.id_kelas = kelas.id_kelas
+    ORDER BY siswa.id_siswa
+");
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $jenis_kelamin = ($row['jenis_kelamin'] == 'L') ? 'Laki-laki' : 'Perempuan';
+    $kelas = $row['tingkat'] . " " . $row['jurusan'] . " " . $row['nama_kelas'];
+
     echo "<tr>";
     echo "<td>{$no}</td>";
-    echo "<td>{$row['nama']}</td>";
-    echo "<td>{$row['nis']}</td>";
-    echo "<td>{$row['kelas']}</td>";
+    echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
+    echo "<td>" . htmlspecialchars($row['nis']) . "</td>";
+    echo "<td>" . htmlspecialchars($kelas) . "</td>";
+    echo "<td>{$jenis_kelamin}</td>";
     echo "<td>
         <a href='edit.php?id={$row['id_siswa']}' class='btn btn-edit'>Edit</a>
         <a href='hapus.php?id={$row['id_siswa']}' 

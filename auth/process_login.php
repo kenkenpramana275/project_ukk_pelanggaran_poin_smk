@@ -17,12 +17,15 @@ if ($user && $password == $user['password']) {
     $_SESSION['id_user'] = $user['id'];
     $_SESSION['username'] = $user['username'];
     $_SESSION['role'] = $user['role'];
+    $_SESSION['id_siswa'] = $user['id_siswa'];
 
     header("Location: ../dashboard.php");
     exit;
 
 } else {
+    
     header("Location: login.php?error=1");
     exit;
+
 }
 ?>

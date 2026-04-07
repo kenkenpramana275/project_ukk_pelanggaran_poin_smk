@@ -9,7 +9,7 @@ if (!isset($_SESSION['login'])) {
 
 // Cek apakah ada ID
 if (!isset($_GET['id'])) {
-    header("Location: jenis.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -22,7 +22,7 @@ $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Jika data tidak ditemukan
 if (!$data) {
-    header("Location: jenis.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -31,17 +31,20 @@ if (isset($_POST['update'])) {
 
     $stmt = $pdo->prepare("
         UPDATE jenis_pelanggaran 
-        SET nama_jenis = ?, poin = ?
+        SET nama_jenis = ?, 
+        deskripsi = ?, poin = ?, kategori_kode = ?
         WHERE id_jenis = ?
     ");
 
     $stmt->execute([
         $_POST['nama_jenis'],
+        $_POST['deskripsi'],
         $_POST['poin'],
+        $_POST['kategori_kode'],
         $id
     ]);
 
-    header("Location: jenis.php");
+    header("Location: index.php");
     exit;
 }
 ?>
@@ -70,14 +73,30 @@ if (isset($_POST['update'])) {
                 <input type="text" name="nama_jenis"
                     value="<?= htmlspecialchars($data['nama_jenis']) ?>" required>
 
+                <label>Deskripsi</label>    
+                <input type="text" name="deskripsi"
+                    value="<?= htmlspecialchars($data['deskripsi']) ?>" required>
+
                 <label>Poin</label>
                 <input type="number" name="poin"
                     value="<?= $data['poin'] ?>" required>
 
+                <label>Kategori Kode</label>
+                <select name="kategori_kode" required>
+                    <option value="">-- Pilih Kategori --</option>
+                    <option value="SS">SS - Seragam Sekolah</option>
+                    <option value="KS">KS - Kehadiran di Sekolah</option>
+                    <option value="PBM">PBM - Proses Belajar Mengajar</option>
+                    <option value="PNN">PNN - Pelanggaran Norma-Norma</option>
+                    <option value="PB">PB - Pelanggaran Berat</option>
+                    <option value="KB">KB - Kesopanan Berkendaraan</option>
+                    <option value="UB">UB - Upacara Bendera</option>
+                </select>    
+
                 <button type="submit" name="update" class="btn btn-edit">
                     Update
                 </button>        
-                <a href="index.php" class="btn">Batal</a>
+                <a href="index.php" class="btn">Cancel</a>
             </form>        
         </div>
     </div>

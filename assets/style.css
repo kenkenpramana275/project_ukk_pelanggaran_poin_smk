@@ -13,6 +13,7 @@
     
     --success: #10b981;
     --warning: #f59e0b;
+    --cancel: #D14249;
     --danger: #ef4444;
     
     --bg-main: #f8fafc;
@@ -64,6 +65,7 @@ body {
     flex-direction: column;
     z-index: 1000;
     box-shadow: var(--shadow-xl);
+    overflow: hidden;
 }
 
 .nav::before {
@@ -85,28 +87,16 @@ body {
     gap: 12px;
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
 }
 
-.brand-icon {
-    font-size: 32px;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-5px); }
-}
-
-.brand-text {
-    font-family: var(--font-mono);
-    font-size: 20px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: -0.5px;
-}
-
-.brand-accent {
-    color: var(--accent);
+.nav-section {
+    font-size: 11px;
+    font-weight: bold;
+    color: #aaa;
+    margin: 15px 0 5px 12px;
+    /* letter-spacing: 1px; */
+    text-transform: uppercase;
 }
 
 .nav-links {
@@ -114,6 +104,27 @@ body {
     padding: 20px 15px;
     position: relative;
     z-index: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+/* scrollbar nav-links */
+.nav-links::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav-links::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.nav-links::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+}
+
+.nav-links::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
 }
 
 .nav-link {
@@ -178,6 +189,8 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
+    background: rgba(2, 6, 23, 0.2);
 }
 
 .nav-logout {
@@ -196,6 +209,28 @@ body {
     background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
     text-decoration: none;
+}
+
+.brand-icon {
+    font-size: 32px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}
+
+.brand-text {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.brand-accent {
+    color: var(--accent);
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -616,6 +651,13 @@ button:hover, .btn:hover {
 
 .btn-tambah:hover {
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, var(--cancel), #d62831);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    padding: 8px 16px;
+    font-size: 14px;
 }
 
 .btn-edit {

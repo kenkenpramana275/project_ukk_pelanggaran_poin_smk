@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/database.php';
+include '../config/auth.php';
 
 if (!isset($_SESSION['login'])) {
     header("Location: ../auth/login.php");
@@ -18,7 +19,7 @@ if (isset($_POST['simpan'])) {
         $_POST['poin']
     ]);
 
-    header("Location: jenis.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -29,7 +30,7 @@ if (isset($_GET['hapus'])) {
     );
     $stmt->execute([$_GET['hapus']]);
 
-    header("Location: jenis.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -41,6 +42,9 @@ $currentFolder = basename(dirname($_SERVER['PHP_SELF']));
 $currentPage   = basename($_SERVER['PHP_SELF']);
 
 $role = $_SESSION['role'];
+
+checkLogin();
+allowRoles(['admin']);
 ?>
 
 <!DOCTYPE html>
@@ -59,12 +63,22 @@ $role = $_SESSION['role'];
         
 <div class="nav-links">
 
+<div class="nav-section">MAIN MENU</div>
+
     <!-- Dashboard -->
     <a href="../dashboard.php"
        class="nav-link <?= ($currentPage == 'dashboard.php') ? 'active' : '' ?>">
         <span class="nav-icon">🏠</span>
         <span class="nav-text">Dashboard</span>
     </a>
+
+    <?php if($role == 'admin'): ?>
+        <a href="../kelas/index.php"
+        class="nav-link <?= ($currentFolder == 'kelas') ? 'active' : '' ?>">
+            <span class="nav-icon">🏫</span>
+            <span class="nav-text">Data Kelas</span>
+        </a>
+    <?php endif; ?>
 
     <!-- ADMIN ONLY -->
     <?php if($role == 'admin'): ?>
@@ -104,19 +118,53 @@ $role = $_SESSION['role'];
 
     <!-- SISWA -->
     <?php if($role == 'siswa'): ?>
-    <a href="../pelanggaran/index.php"
-       class="nav-link">
+    <a href="../pelanggaran/saya.php" class="nav-link <?= ($currentPage == 'saya.php') ? 'active' : '' ?>">
         <span class="nav-icon">📄</span>
         <span class="nav-text">Pelanggaran Saya</span>
     </a>
     <?php endif; ?>
 
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../cetak_rekap/index.php"
+    class="nav-link <?= ($currentFolder == 'cetak_rekap') ? 'active' : '' ?>">
+        <span class="nav-icon">🖨️</span>
+        <span class="nav-text">Rekap Pelanggaran</span>
+    </a>
+    <?php endif; ?>
+
+    <div class="nav-section">CETAK SURAT</div>
+
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../surat_orangtua/index.php"
+    class="nav-link <?= ($currentFolder == 'surat_orangtua') ? 'active' : '' ?>">
+        <span class="nav-icon">📨</span>
+        <span class="nav-text">Panggilan Orang Tua</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../surat_perjanjian/index.php"
+    class="nav-link <?= ($currentFolder == 'surat_perjanjian') ? 'active' : '' ?>">
+        <span class="nav-icon">📝</span>
+        <span class="nav-text">Surat Perjanjian</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if($role == 'admin' || $role == 'guru_bk'): ?>
+    <a href="../surat_pindah/index.php"
+    class="nav-link <?= ($currentFolder == 'surat_pindah') ? 'active' : '' ?>">
+        <span class="nav-icon">📑</span>
+        <span class="nav-text">Surat Pindah</span>
+    </a>
+    <?php endif; ?>
 </div>
         <div class="nav-footer">
+        <?php if($role == 'admin'): ?>
         <a href="../users/index.php" class="nav-link">
             <span class="nav-icon">👤</span>
             <span class="nav-text">Users</span>
         </a>
+        <?php endif; ?>
             <a href="../auth/logout.php" class="nav-logout">
                 <span class="nav-icon">🚪</span>
                 <span class="nav-text">Logout</span>
