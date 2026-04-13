@@ -37,8 +37,13 @@ if (isset($_POST['simpan'])) {
             $_POST['keterangan']
         ]);
 
-        header("Location: index.php");
+        if ($_SESSION['role'] == 'guru_mapel') {
+            header("Location: ../dashboard.php");
+        } else {
+            header("Location: index.php");
+        }
         exit;
+
     } else {
         echo "<script>alert('Semua data wajib diisi!');</script>";
     }

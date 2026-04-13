@@ -76,16 +76,29 @@ $alasanPindah = "Mengikuti kebijakan sekolah berdasarkan akumulasi poin pelangga
         }
 
         .btn-print {
-            display: inline-block;
-            padding: 8px 16px;
+            /* display: inline-block; */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 80px;
+            height: 38px;
+
+            /* padding: 8px 16px; */
+            
+            padding: 0;
+
             background: #111827;
             color: #fff;
             text-decoration: none;
+
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin: 0 4px;
+
+            /* margin: 0 4px; */
             font-size: 13px;
+            font-family: inherit;
         }
 
         .kop {

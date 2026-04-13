@@ -143,7 +143,7 @@ allowRoles(['admin', 'guru_bk']);
 
 <div class="container">
     <h2>Data Siswa</h2>
-    <a href="tambah.php" class="btn btn-tambah">Tambah</a>
+    <a href="tambah.php" class="btn btn-tambah">Tambah Siswa</a>
     <table id="usersTable" class="display">
     <thead>
         <tr>
