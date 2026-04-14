@@ -70,7 +70,7 @@ $tanggalSurat = date('d-m-Y');
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Panggilan Orang Tua</title>
+    <title>Cetak Surat Panggilan Orang Tua</title>
     <style>
         body {
             font-family: "Times New Roman", serif;

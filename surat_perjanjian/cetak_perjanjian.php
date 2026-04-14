@@ -63,7 +63,7 @@ $tanggalSurat = date('d-m-Y');
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Perjanjian Siswa</title>
+    <title>Cetak Surat Perjanjian Siswa</title>
     <style>
         body {
             font-family: "Times New Roman", serif;

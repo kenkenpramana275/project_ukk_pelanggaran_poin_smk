@@ -50,7 +50,7 @@ $alasanPindah = "Mengikuti kebijakan sekolah berdasarkan akumulasi poin pelangga
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Keterangan Pindah Sekolah</title>
+    <title>Cetak Keterangan Pindah Sekolah</title>
     <style>
         body {
             font-family: "Times New Roman", serif;
