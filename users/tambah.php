@@ -3,6 +3,11 @@ session_start();
 include '../config/database.php';
 include '../config/auth.php';
 
+$popup = false;
+$popup_type = '';
+$popup_message = '';
+$redirect_url = '';
+
 checkLogin();
 allowRoles(['admin']);
 
@@ -19,16 +24,24 @@ if ($_SESSION['role'] != 'admin') {
 if (isset($_POST['simpan'])) {
     $id_siswa = ($_POST['role'] == 'siswa' && !empty($_POST['id_siswa'])) ? $_POST['id_siswa'] : null;
 
-    $stmt = $pdo->prepare("INSERT INTO users (username, password, role, id_siswa) VALUES (?, ?, ?, ?)");
-    $stmt->execute([
-        $_POST['username'],
-        $_POST['password'],
-        $_POST['role'],
-        $id_siswa
-    ]);
+    if ($_POST['username'] != '' && $_POST['password'] != '' && $_POST['role'] != '') {
+        $stmt = $pdo->prepare("INSERT INTO users (username, password, role, id_siswa) VALUES (?, ?, ?, ?)");
+        $stmt->execute([
+            $_POST['username'],
+            $_POST['password'],
+            $_POST['role'],
+            $id_siswa
+        ]);
 
-    header("Location: index.php");
-    exit;
+        $popup = true;
+        $popup_type = 'success';
+        $popup_message = 'User berhasil ditambahkan!';
+        $redirect_url = 'index.php';
+    } else {
+        $popup = true;
+        $popup_type = 'error';
+        $popup_message = 'Semua data wajib diisi!';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -81,6 +94,17 @@ if (isset($_POST['simpan'])) {
         </form>
     </div>
 </div>
+
+<?php if ($popup): ?>
+<div class="popup-overlay">
+    <div class="popup-box <?= $popup_type === 'success' ? 'popup-success' : 'popup-error' ?>">
+        <div class="popup-icon"><?= $popup_type === 'success' ? '✓' : '!' ?></div>
+        <h3><?= $popup_type === 'success' ? 'Berhasil' : 'Peringatan' ?></h3>
+        <p><?= $popup_message ?></p>
+        <button class="popup-btn" onclick="window.location.href='<?= $redirect_url ?>'">OK</button>
+    </div>
+</div>
+<?php endif; ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

@@ -2,13 +2,18 @@
 session_start();
 include '../config/database.php';
 
+$popup = false;
+$popup_type = '';
+$popup_message = '';
+$redirect_url = '';
+
 if (!isset($_SESSION['login'])) {
     header("Location: ../auth/login.php");
     exit;
 }
 
 // Cek apakah ada ID
-if (!isset($_GET['id'])) {
+if (!isset($_GET['id']) || $_GET['id'] == '') {
     header("Location: index.php");
     exit;
 }
@@ -28,28 +33,51 @@ if (!$data) {
 
 // PROSES UPDATE
 if (isset($_POST['update'])) {
+    $nama_jenis = trim($_POST['nama_jenis']);
+    $deskripsi = trim($_POST['deskripsi']);
+    $poin = trim($_POST['poin']);
+    $kategori_kode = trim($_POST['kategori_kode']);
 
-    $stmt = $pdo->prepare("
-        UPDATE jenis_pelanggaran 
-        SET nama_jenis = ?, 
-        deskripsi = ?, poin = ?, kategori_kode = ?
-        WHERE id_jenis = ?
-    ");
+    if ($nama_jenis != '' && $deskripsi != '' && $poin != '' && $kategori_kode != '') {
+        $stmt = $pdo->prepare("
+            UPDATE jenis_pelanggaran 
+            SET nama_jenis = ?, 
+                deskripsi = ?, 
+                poin = ?, 
+                kategori_kode = ?
+            WHERE id_jenis = ?
+        ");
 
-    $stmt->execute([
-        $_POST['nama_jenis'],
-        $_POST['deskripsi'],
-        $_POST['poin'],
-        $_POST['kategori_kode'],
-        $id
-    ]);
+        $stmt->execute([
+            $nama_jenis,
+            $deskripsi,
+            $poin,
+            $kategori_kode,
+            $id
+        ]);
 
-    header("Location: index.php");
-    exit;
+        // refresh data terbaru
+        $stmt = $pdo->prepare("SELECT * FROM jenis_pelanggaran WHERE id_jenis = ?");
+        $stmt->execute([$id]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $popup = true;
+        $popup_type = 'success';
+        $popup_message = 'Data jenis pelanggaran berhasil diperbarui!';
+        $redirect_url = 'index.php';
+    } else {
+        $popup = true;
+        $popup_type = 'error';
+        $popup_message = 'Semua data wajib diisi!';
+
+        // isi ulang form dengan data POST terakhir
+        $data['nama_jenis'] = $nama_jenis;
+        $data['deskripsi'] = $deskripsi;
+        $data['poin'] = $poin;
+        $data['kategori_kode'] = $kategori_kode;
+    }
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -79,18 +107,18 @@ if (isset($_POST['update'])) {
 
                 <label>Poin</label>
                 <input type="number" name="poin"
-                    value="<?= $data['poin'] ?>" required>
+                    value="<?= htmlspecialchars($data['poin']) ?>" required>
 
                 <label>Kategori Kode</label>
                 <select name="kategori_kode" required>
                     <option value="">-- Pilih Kategori --</option>
-                    <option value="SS">SS - Seragam Sekolah</option>
-                    <option value="KS">KS - Kehadiran di Sekolah</option>
-                    <option value="PBM">PBM - Proses Belajar Mengajar</option>
-                    <option value="PNN">PNN - Pelanggaran Norma-Norma</option>
-                    <option value="PB">PB - Pelanggaran Berat</option>
-                    <option value="KB">KB - Kesopanan Berkendaraan</option>
-                    <option value="UB">UB - Upacara Bendera</option>
+                    <option value="SS" <?= ($data['kategori_kode'] == 'SS') ? 'selected' : '' ?>>SS - Seragam Sekolah</option>
+                    <option value="KS" <?= ($data['kategori_kode'] == 'KS') ? 'selected' : '' ?>>KS - Kehadiran di Sekolah</option>
+                    <option value="PBM" <?= ($data['kategori_kode'] == 'PBM') ? 'selected' : '' ?>>PBM - Proses Belajar Mengajar</option>
+                    <option value="PNN" <?= ($data['kategori_kode'] == 'PNN') ? 'selected' : '' ?>>PNN - Pelanggaran Norma-Norma</option>
+                    <option value="PB" <?= ($data['kategori_kode'] == 'PB') ? 'selected' : '' ?>>PB - Pelanggaran Berat</option>
+                    <option value="KB" <?= ($data['kategori_kode'] == 'KB') ? 'selected' : '' ?>>KB - Kesopanan Berkendaraan</option>
+                    <option value="UB" <?= ($data['kategori_kode'] == 'UB') ? 'selected' : '' ?>>UB - Upacara Bendera</option>
                 </select>    
 
                 <button type="submit" name="update" class="btn btn-edit">
@@ -100,6 +128,30 @@ if (isset($_POST['update'])) {
             </form>        
         </div>
     </div>
+
+    <?php if ($popup): ?>
+        <div class="popup-overlay" id="popupOverlay">
+            <div class="popup-box <?= $popup_type === 'success' ? 'popup-success' : 'popup-error' ?>">
+                <div class="popup-icon">
+                    <?= $popup_type === 'success' ? '✓' : '!' ?>
+                </div>
+                <h3><?= $popup_type === 'success' ? 'Berhasil' : 'Peringatan' ?></h3>
+                <p><?= htmlspecialchars($popup_message) ?></p>
+                <button type="button" class="popup-btn" onclick="closePopup()">OK</button>
+            </div>
+        </div>
+
+        <script>
+            function closePopup() {
+                const redirectUrl = <?= json_encode($redirect_url) ?>;
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    document.getElementById('popupOverlay').style.display = 'none';
+                }
+            }
+        </script>
+    <?php endif; ?>
 
 </body>
 </html>

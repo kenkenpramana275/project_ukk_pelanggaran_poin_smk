@@ -1,24 +1,30 @@
 <?php
 session_start();
+
 include '../config/database.php';
 include '../config/auth.php';
 
 checkLogin();
 allowRoles(['admin', 'guru_bk']);
 
-$role = $_SESSION['role'];
+$popup = false;
+$popup_type = '';
+$popup_message = '';
+$redirect_url = '';
 
+$role = $_SESSION['role'];
 $currentFolder = basename(dirname($_SERVER['PHP_SELF']));
 $currentPage   = basename($_SERVER['PHP_SELF']);
 
+// cek id
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    echo "ID pelanggaran tidak ditemukan.";
+    header("Location: index.php");
     exit;
 }
 
 $id = $_GET['id'];
 
-/* Ambil data pelanggaran yang akan diedit */
+// ambil data pelanggaran
 $stmt = $pdo->prepare("
     SELECT * FROM pelanggaran
     WHERE id_pelanggaran = ?
@@ -27,11 +33,11 @@ $stmt->execute([$id]);
 $pelanggaran = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$pelanggaran) {
-    echo "Data pelanggaran tidak ditemukan.";
+    header("Location: index.php");
     exit;
 }
 
-/* Ambil data siswa */
+// ambil data siswa
 $stmtSiswa = $pdo->query("
     SELECT id_siswa, nama, nis
     FROM siswa
@@ -39,7 +45,7 @@ $stmtSiswa = $pdo->query("
 ");
 $dataSiswa = $stmtSiswa->fetchAll(PDO::FETCH_ASSOC);
 
-/* Ambil data jenis pelanggaran */
+// ambil data jenis pelanggaran
 $stmtJenis = $pdo->query("
     SELECT id_jenis, nama_jenis, poin
     FROM jenis_pelanggaran
@@ -47,24 +53,48 @@ $stmtJenis = $pdo->query("
 ");
 $dataJenis = $stmtJenis->fetchAll(PDO::FETCH_ASSOC);
 
-/* Proses update */
+// proses update
 if (isset($_POST['update'])) {
-    $stmtUpdate = $pdo->prepare("
-        UPDATE pelanggaran
-        SET id_siswa = ?, id_jenis = ?, tanggal = ?, keterangan = ?
-        WHERE id_pelanggaran = ?
-    ");
+    $id_siswa = trim($_POST['id_siswa']);
+    $id_jenis = trim($_POST['id_jenis']);
+    $tanggal = trim($_POST['tanggal']);
+    $keterangan = trim($_POST['keterangan']);
 
-    $stmtUpdate->execute([
-        $_POST['id_siswa'],
-        $_POST['id_jenis'],
-        $_POST['tanggal'],
-        $_POST['keterangan'],
-        $id
-    ]);
+    if ($id_siswa != "" && $id_jenis != "" && $tanggal != "" && $keterangan != "") {
+        $stmtUpdate = $pdo->prepare("
+            UPDATE pelanggaran
+            SET id_siswa = ?, id_jenis = ?, tanggal = ?, keterangan = ?
+            WHERE id_pelanggaran = ?
+        ");
 
-    header("Location: index.php");
-    exit;
+        $stmtUpdate->execute([
+            $id_siswa,
+            $id_jenis,
+            $tanggal,
+            $keterangan,
+            $id
+        ]);
+
+        // refresh data terbaru
+        $stmt = $pdo->prepare("SELECT * FROM pelanggaran WHERE id_pelanggaran = ?");
+        $stmt->execute([$id]);
+        $pelanggaran = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $popup = true;
+        $popup_type = 'success';
+        $popup_message = 'Data pelanggaran berhasil diperbarui!';
+        $redirect_url = 'index.php';
+    } else {
+        $popup = true;
+        $popup_type = 'error';
+        $popup_message = 'Semua data wajib diisi!';
+
+        // isi ulang form dengan data POST terakhir
+        $pelanggaran['id_siswa'] = $id_siswa;
+        $pelanggaran['id_jenis'] = $id_jenis;
+        $pelanggaran['tanggal'] = $tanggal;
+        $pelanggaran['keterangan'] = $keterangan;
+    }
 }
 ?>
 
@@ -107,16 +137,52 @@ if (isset($_POST['update'])) {
             </select>
 
             <label for="tanggal">Tanggal</label>
-            <input type="date" name="tanggal" id="tanggal" value="<?= htmlspecialchars($pelanggaran['tanggal']); ?>" required>
+            <input
+                type="date"
+                name="tanggal"
+                id="tanggal"
+                value="<?= htmlspecialchars($pelanggaran['tanggal']); ?>"
+                required
+            >
 
             <label for="keterangan">Keterangan</label>
-            <input type="text" name="keterangan" id="keterangan" value="<?= htmlspecialchars($pelanggaran['keterangan']); ?>" required>
+            <input
+                type="text"
+                name="keterangan"
+                id="keterangan"
+                value="<?= htmlspecialchars($pelanggaran['keterangan']); ?>"
+                required
+            >
 
-            <button type="submit" name="update" class="btn-edit">Update</button>
+            <button type="submit" name="update" class="btn btn-edit">Update</button>
             <a href="index.php" class="btn">Kembali</a>
         </form>
     </div>
 </div>
+
+<?php if ($popup): ?>
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-box <?= $popup_type === 'success' ? 'popup-success' : 'popup-error' ?>">
+            <div class="popup-icon">
+                <?= $popup_type === 'success' ? '✓' : '!' ?>
+            </div>
+            <h3><?= $popup_type === 'success' ? 'Berhasil' : 'Peringatan' ?></h3>
+            <p><?= htmlspecialchars($popup_message) ?></p>
+            <button type="button" class="popup-btn" onclick="closePopup()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        function closePopup() {
+            const redirectUrl = <?= json_encode($redirect_url) ?>;
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else {
+                document.getElementById('popupOverlay').style.display = 'none';
+            }
+        }
+    </script>
+<?php endif; ?>
 
 </body>
 </html>

@@ -196,12 +196,51 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php if ($role == 'admin'): ?>
         <td>
             <a href="edit.php?id=<?= $u['id']; ?>" class="btn btn-edit">Edit</a>
-            <a href="hapus.php?id=<?= $u['id']; ?>" class="btn btn-delete" onclick="return confirm('Yakin ingin menghapus user ini?')">Hapus</a>
+            <a href="hapus.php?id=<?= $u['id']; ?>" class="btn btn-delete btn-hapus">Hapus</a>
         </td>
         <?php endif; ?>
     </tr>
     <?php endforeach; ?>
 </table>
+
+<!-- Popup Konfirmasi Hapus -->
+<div class="popup-overlay" id="deletePopup" style="display: none;">
+    <div class="popup-box popup-error">
+        <div class="popup-icon">!</div>
+        <h3>Konfirmasi Hapus</h3>
+        <p>Yakin ingin menghapus user ini?</p>
+        <div class="popup-actions">
+            <button type="button" class="popup-btn popup-btn-cancel" id="cancelDeleteBtn">Batal</button>
+            <a href="#" id="confirmDeleteBtn" class="popup-btn popup-btn-delete">Ya, Hapus</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('.btn-hapus');
+    if (target) {
+        e.preventDefault();
+        const deleteUrl = target.getAttribute('href');
+        document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+        document.getElementById('deletePopup').style.display = 'flex';
+    }
+});
+
+document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+    closeDeletePopup();
+});
+
+document.getElementById('deletePopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeletePopup();
+    }
+});
+
+function closeDeletePopup() {
+    document.getElementById('deletePopup').style.display = 'none';
+}
+</script>
 
 </body>
 </html>
